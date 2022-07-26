@@ -30,8 +30,9 @@ contract ManageShipment {
 
     mapping(address => mapping(uint256 => ContainerDetails)) shipmentRequest;
 
+    // Events
     event ShipmentRequested(address a, string origin, string destination);
-    event GeneratedID(address a, uint256 id, uint256 gid);
+    event ShipmentApprovedAndIDGenerated(address a, uint256 id, uint256 gid);
 
     // mapping(address => ContainerDetails) shipment;
 
@@ -46,6 +47,7 @@ contract ManageShipment {
         emit ShipmentRequested(msg.sender, s_origin, s_destination);
     }
 
+    // How are the documents approved? Physocally? in IPFS? //////////////////////////
     function approveDocuments(
         address requester,
         uint256 requestID,
@@ -53,12 +55,13 @@ contract ManageShipment {
     ) public {
         shipmentRequest[requester][requestID] = ContainerDetails.approved;
         shipmentRequest[requester][requestID] = ContainerDetails.idGenerated;
-        emit GeneratedID(requester, requestID, idGenerated);
+        emit ShipmentApprovedAndIDGenerated(requester, requestID, idGenerated);
         // shipment = ContainerDetails.approved;
         // shipment = ContainerDetails.idGenerated;
         // assign the container a unique ID (cargo control number)
     }
 
+    // mint the nft here
     function createNFT(
         address _nft,
         address to,
@@ -71,7 +74,12 @@ contract ManageShipment {
             "Invalid Request. Cargo control number not assigned!"
         );
         ContainerNFT(_nft).safeMint(msg.sender, "uri");
-        // mint the nft here
+
+        //###############################################################################################################
+        // How to include the generated id in the nft
+        // 1. The shipper can manually upload the metadata to IPFS
+        // 2. See if theres a way to uppload from here
+        // 3. Does the agent need to check the data?
     }
 }
 
