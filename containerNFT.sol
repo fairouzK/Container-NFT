@@ -58,7 +58,7 @@ contract ManageShipment {
         emit ShipmentApprovedAndIDGenerated(requester, requestID, idGenerated);
         // shipment = ContainerDetails.approved;
         // shipment = ContainerDetails.idGenerated;
-        // assign the container a unique ID (cargo control number)
+        // assign the container a unique ID (Container number)
     }
 
     // mint the nft here
@@ -71,7 +71,7 @@ contract ManageShipment {
         require(
             shipmentRequest[msg.sender][requestID] ==
                 ContainerDetails.idGenerated,
-            "Invalid Request. Cargo control number not assigned!"
+            "Invalid Request. container number not assigned!"
         );
         ContainerNFT(_nft).safeMint(msg.sender, "uri");
 
