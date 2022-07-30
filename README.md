@@ -1,19 +1,20 @@
 # Container-NFT
 
-##### Thesis Part-II
+#### Thesis Part-II
 
 In the shipping process, every container is represented using an NFT.
 This makes it easier in pwnership transfer and cargo history traceability,
 easier cargo auctioning platform, and secure shipping documentaion.
 
-Steps: 0. The contract addresses are set.
-
+Process flow steps:  <br>
+0. The contract addresses are set.
 1. Shipper places a shipment request using requestShipment() function.
 2. Shipping agent approves the required documents and assigns a shipping container number to the request. This is done when the agent books a container pickup for the cargo approveShipmentRequest() function.
 3. Using the assigned container number, the shipper mints a container nft to his address.
    The metadata of the NFT is created with the following format in json and stored in IPFS.
+   
 
-Metadata Template <br>
+*Metadata Template <br>
 { <br>
 &emsp; Shipping Container Number: <br>
 &emsp; Shipment Owner: <br>
@@ -21,8 +22,8 @@ Metadata Template <br>
 &emsp; Shipment Content: <br>
 &emsp; Shipper Company: <br>
 &emsp; Image: <br>
-&emsp; Other related Documents (if necessary) <br>
-}
+&emsp; Other related Documents link (if necessary) <br>
+}*
 
 4. The shipper approves the manager contract to manage the ownership transfers of the NFT using the approveOperator from ContainerNFT SC.
 5. The shipping agent issues Bill of Lading, and stores it in IPFS using the issueBoL() function, while transferring the NFT ownership to the pickup truck's address at the same time.
