@@ -7,7 +7,7 @@ This makes it easier in pwnership transfer and cargo history traceability,
 easier cargo auctioning platform, and secure shipping documentaion.
 
 Process flow steps:  <br>
-0. The contract addresses are set.
+
 1. Shipper places a shipment request using requestShipment() function.
 2. Shipping agent approves the required documents and assigns a shipping container number to the request. This is done when the agent books a container pickup for the cargo approveShipmentRequest() function.
 3. Using the assigned container number, the shipper mints a container nft to his address.
