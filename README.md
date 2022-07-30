@@ -13,15 +13,15 @@ Steps: 0. The contract addresses are set.
 3. Using the assigned container number, the shipper mints a container nft to his address.
    The metadata of the NFT is created with the following format in json and stored in IPFS.
 
-Metadata Template
-{
-Shipping Container Number:  
- Shipment Owner:
-Shipment Receiver:
-Shipment Content:
-Shipper Company:
-Image:
-Other related Documents (if necessary)  
+Metadata Template <br>
+{ <br>
+&emsp; Shipping Container Number:  <br>
+&emsp; Shipment Owner: <br>
+&emsp; Shipment Receiver: <br>
+&emsp; Shipment Content: <br>
+&emsp; Shipper Company: <br>
+&emsp; Image: <br>
+&emsp; Other related Documents (if necessary)  <br>
  }
 
 4. The shipper approves the manager contract to manage the ownership transfers of the NFT using the approveOperator from ContainerNFT SC.
