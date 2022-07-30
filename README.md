@@ -15,14 +15,14 @@ Steps: 0. The contract addresses are set.
 
 Metadata Template <br>
 { <br>
-&emsp; Shipping Container Number:  <br>
+&emsp; Shipping Container Number: <br>
 &emsp; Shipment Owner: <br>
 &emsp; Shipment Receiver: <br>
 &emsp; Shipment Content: <br>
 &emsp; Shipper Company: <br>
 &emsp; Image: <br>
-&emsp; Other related Documents (if necessary)  <br>
- }
+&emsp; Other related Documents (if necessary) <br>
+}
 
 4. The shipper approves the manager contract to manage the ownership transfers of the NFT using the approveOperator from ContainerNFT SC.
 5. The shipping agent issues Bill of Lading, and stores it in IPFS using the issueBoL() function, while transferring the NFT ownership to the pickup truck's address at the same time.
@@ -37,5 +37,6 @@ Metadata Template <br>
 #### If the receiver decides to abandon/auction the Cargo
 
 7. The receiver sends a notice to auction the cargo.
-8. The last transporter transfers the NFT ownership to the shipping agent using the .
-9. The shipping agent auctions the cargo.
+8. The last transporter approves the manager SC using the approveOperator() function in the ContainerNFT SC.
+9. The shipping agent sets the starting bid amount, and auction duration and auctions the cargo.
+10. After the auction ends, the cargo ownership is transferred to th ehighest bidder.
