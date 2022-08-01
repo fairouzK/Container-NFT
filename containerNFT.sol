@@ -52,7 +52,7 @@ contract ManageShipment {
     );
     event BoLIssuedAndStored(address _shipper, uint256 requestId, string _bol);
     event DocumentIssuedAndStored(
-        address _shipper,
+        address shipper,
         uint256 requestId,
         string _bol
     );
@@ -81,10 +81,10 @@ contract ManageShipment {
 
     constructor() {
         contractOwner = msg.sender;
-        Agent = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
-        Shipper = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;
-        Receiver = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
-        Transporter = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
+        agent = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+        shipper = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;
+        receiver = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
+        transporter = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
     }
 
     // Modifiers
@@ -93,19 +93,19 @@ contract ManageShipment {
         _;
     }
     modifier onlyAgent() {
-        require(msg.sender == Agent);
+        require(msg.sender == agent);
         _;
     }
     modifier onlyShipper() {
-        require(msg.sender == Shipper);
+        require(msg.sender == shipper);
         _;
     }
     modifier onlyReceiver() {
-        require(msg.sender == Receiver);
+        require(msg.sender == receiver);
         _;
     }
     modifier onlyAuctioners() {
-        require(msg.sender == Receiver || msg.sender == Agent);
+        require(msg.sender == receiver || msg.sender == agent);
         _;
     }
 
