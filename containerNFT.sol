@@ -524,10 +524,10 @@ contract AuctionNFT {
     Metadata Template
     {
         Container Number:  
-        Ownership transfer point?
         Shipment Owner:
         Shipment Receiver:
         Shipment Content: 
+        Container Ownership Transfer Point
         Image:
         Bill Of Lading:          
     }
