@@ -42,6 +42,7 @@ _Metadata Template <br>
 9. The agent approves the auction while also transferring the NFT to the AuctionNFT SC using the approveAuction() function.
 10. The agent can then invoke the start() function from the AuctionNFT SC to start the auction.
 11. The shipping agent sets the starting bid amount, and auction duration and auctions the cargo.
-12. After the auction ends, the cargo ownership is transferred to the highest bidder using the end() function from the AuctionNFT SC. NB. The auction sc is operated by the agent.
+12. After the auction ends, the cargo ownership is transferred to the highest bidder using the end() function from the AuctionNFT SC. <br>
+NB. The auction sc is operated by the agent.
 
 Final: The token can be burn using the ContainerNFT SC if the receiver or bidder deem it necessay.
