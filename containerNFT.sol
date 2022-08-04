@@ -73,10 +73,10 @@ contract ShipmentManager {
 
     // IERC721Man public containerNFT;
     address private contractOwner;
-    address Agent;
-    address Shipper;
-    address Receiver;
-    address Transporter;
+    address agent;
+    address shipper;
+    address receiver;
+    address transporter;
 
     constructor() {
         contractOwner = msg.sender;
@@ -188,32 +188,32 @@ contract ShipmentManager {
 
     // After the NFT is minted, the agent issues the BoL and store it on the IPFS
     function issueBoL(
-        address shipper,
+        address _shipper,
         uint256 requestID,
         address transporter,
         string memory bol
     ) public onlyAgent {
         require(
-            shipmentRequest[shipper][requestID].sStatus ==
+            shipmentRequest[_shipper][requestID].sStatus ==
                 ShipmentState.NFTMinted,
             "Container NFT not minted!"
         );
-        uint256 tokenId = shipmentRequest[shipper][requestID].NFTId;
+        uint256 tokenId = shipmentRequest[_shipper][requestID].NFTId;
         require(
             ContainerNFT(minterContract).getApproved(tokenId) == address(this),
             "Agent not approved as operator"
         );
 
-        shipmentRequest[shipper][requestID].bolLink = bol; // can be set through js or json
-        shipmentRequest[shipper][requestID].sStatus = ShipmentState.BoLIssued;
-        emit BoLIssuedAndStored(shipper, requestID, bol);
+        shipmentRequest[_shipper][requestID].bolLink = bol; // can be set through js or json
+        shipmentRequest[_shipper][requestID].sStatus = ShipmentState.BoLIssued;
+        emit BoLIssuedAndStored(_shipper, requestID, bol);
 
         ContainerNFT(minterContract).safeTransferFrom(
             Owner(tokenId),
             transporter,
             tokenId
         );
-        shipmentRequest[shipper][requestID].sStatus = ShipmentState.Departed;
+        shipmentRequest[_shipper][requestID].sStatus = ShipmentState.Departed;
     }
 
     /*
