@@ -3,8 +3,8 @@
 #### Thesis Part-II
 
 In the shipping process, every container is represented using an NFT.
-This makes it easier in pwnership transfer and cargo history traceability,
-easier cargo auctioning platform, and secure shipping documentaion.
+This makes it easier in ownership transfer and cargo history traceability,
+easier cargo auctioning, and secure shipping documentaion.
 
 Process flow steps:  <br>
 
