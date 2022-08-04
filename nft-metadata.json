@@ -1,0 +1,15 @@
+
+{
+    "container identifier": "MSKU 907032 3",
+    "shipment owner": "ABC",
+    "shipment receiver": "XYZ",
+    "origin": "Shanghai, China",
+    "destination": "Dubai, UAE",
+    "content": "electronic equipment",
+    "shipping company": "Maersk",
+    "image": "https://ipfs.io/ipfs/QmdpZMFRjGX57Y2G2PyxxpPbuVQYmeCQqruVjT9Rk1MaRE?filename=container%20content.jpg",
+    "traits": [
+        "equipment": "air conditioners",
+        "count": "100"
+    ]
+}

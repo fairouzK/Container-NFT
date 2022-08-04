@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ManageShipment {
+contract ShipmentManager {
     using Counters for Counters.Counter;
 
     Counters.Counter private _shipmentRequestID;
@@ -23,8 +23,7 @@ contract ManageShipment {
         ClaimApproved,
         DestinationReached,
         Auctioned,
-        AuctionApproved,
-        BidOn
+        AuctionApproved
     }
 
     struct ShipmentDetails {
@@ -33,7 +32,7 @@ contract ManageShipment {
         string metadataLink;
         ShipmentState sStatus;
         string bolLink;
-        // mapping (string => string) relatedDocuments;  // Map document name with its ipfs link
+        mapping(string => string) relatedDocuments; // Map document name with its ipfs link
     }
 
     // Map the shipper, requestId and shipment details struct
@@ -69,8 +68,8 @@ contract ManageShipment {
         uint256 tokenId
     );
     event shipmentDeliveredSuccessfully(address sender, uint256 shipmentId);
-    // event OwnerShipTransferredToHighestBidder(uint256 tokenId, address highestBidder);
     event ContainerNFTBurnt(address burner, uint256 tokenId);
+    event AuctionApprovedAndNFTTransferredToAuctionSC(uint256 tokenId);
 
     // IERC721Man public containerNFT;
     address private contractOwner;
@@ -140,6 +139,7 @@ contract ManageShipment {
         uint256 requestId = _shipmentRequestID.current();
         shipmentRequest[msg.sender][requestId].sStatus = ShipmentState
             .Requested;
+        // ContainerNFT(minterContract).setApprovalForAll(Agent, true);
         emit ShipmentRequested(requestId, msg.sender, s_destination);
 
         _shipmentRequestID.increment();
@@ -198,12 +198,15 @@ contract ManageShipment {
                 ShipmentState.NFTMinted,
             "Container NFT not minted!"
         );
+        uint256 tokenId = shipmentRequest[shipper][requestID].NFTId;
+        require(
+            ContainerNFT(minterContract).getApproved(tokenId) == address(this),
+            "Agent not approved as operator"
+        );
 
         shipmentRequest[shipper][requestID].bolLink = bol; // can be set through js or json
         shipmentRequest[shipper][requestID].sStatus = ShipmentState.BoLIssued;
         emit BoLIssuedAndStored(shipper, requestID, bol);
-
-        uint256 tokenId = shipmentRequest[shipper][requestID].NFTId;
 
         ContainerNFT(minterContract).safeTransferFrom(
             Owner(tokenId),
@@ -226,30 +229,6 @@ contract ManageShipment {
     // To check the current owner of the NFT
     function Owner(uint256 tokenId) public view returns (address) {
         return (ContainerNFT(minterContract).ownerOf(tokenId));
-    }
-
-    /*
-        For the second ownership transfer only, from the sender to the export hauler
-        To make the BoL and physical container exchange smoother, 
-        by having the shipping agent take care of the digital process flow
-    */
-    function transferContainerNFTOwnerShip(
-        address shipper,
-        uint256 shipmentID,
-        address to,
-        uint256 tokenId
-    ) public {
-        require(
-            shipmentRequest[shipper][shipmentID].sStatus ==
-                ShipmentState.BoLIssued
-        );
-
-        ContainerNFT(minterContract).safeTransferFrom(
-            Owner(tokenId),
-            to,
-            tokenId
-        );
-        // safeTransferFrom emits Transfer(from, to, tokenid) event
     }
 
     function claimCargo(
@@ -313,37 +292,32 @@ contract ManageShipment {
         emit CargoAuctionRequested(msg.sender, sender, shipmentId, tokenId);
     }
 
-    /* 
-        When the NFT is auctioned, the transporter or the current owner can 
-        transfer the NFT to the customs/ whoever is responsible
-    */
-    function auctionApproval(address sender, uint256 shipmentId) public {
+    // When the NFT is auctioned, the transporter or the current owner can transfer the NFT to the customs/ whoever is responsible
+    function auctionApproval(
+        address sender,
+        uint256 shipmentId,
+        address auctionSC
+    ) public onlyAgent {
         require(
             shipmentRequest[sender][shipmentId].sStatus ==
                 ShipmentState.Auctioned
         );
+        uint256 tokenId = shipmentRequest[sender][shipmentId].NFTId;
+        require(
+            ContainerNFT(minterContract).getApproved(tokenId) == address(this),
+            "Manager SC is not approved operator yet"
+        );
+
+        ContainerNFT(minterContract).transferFrom(
+            Owner(tokenId),
+            auctionSC,
+            tokenId
+        );
+
         shipmentRequest[sender][shipmentId].sStatus = ShipmentState
             .AuctionApproved;
-
-        // From here, got to the AuctionNFT SC to auction the NFT
+        emit AuctionApprovedAndNFTTransferredToAuctionSC(tokenId);
     }
-
-    // When the auction is over and the payment is confirmed, the NFT ownership is transferred
-    // The shipping agent is able to transfer the ownership of the NFT, as approved by the shipper
-    // function transferToHighestBidder(uint256 tokenId) public {
-    //     // Get the highest bidder and highest bid
-    //     // Then transfer the NFT to the highest bidder
-    //     // Emit an event detailing the confirmation of payment and transfer of nft
-    //     // AuctionNFT(auctionContract).getHighestBid(tokenId);
-
-    //     ContainerNFT(minterContract).safeTransferFrom(
-    //         ContainerNFT(minterContract).ownerOf(tokenId),
-    //         AuctionNFT(auctionContract).getHighestBidder(tokenId),
-    //         tokenId);
-
-    //     emit OwnerShipTransferredToHighestBidder(tokenId,
-    //         AuctionNFT(auctionContract).getHighestBidder(tokenId));
-    // }
 
     function burnContainerNFT(
         address sender,
@@ -354,7 +328,7 @@ contract ManageShipment {
             shipmentRequest[sender][shipmentId].sStatus ==
                 ShipmentState.DestinationReached ||
                 shipmentRequest[sender][shipmentId].sStatus ==
-                ShipmentState.BidOn
+                ShipmentState.AuctionApproved
         );
         ContainerNFT(minterContract).burnNFT(tokenId);
         emit ContainerNFTBurnt(msg.sender, tokenId);
@@ -390,6 +364,7 @@ contract ContainerNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        // ManageShipment(managerContract).setContainerNFTId(to, requestID, tokenId);
         emit NFTmintedForContainer(tokenId, to);
         return tokenId;
     }
@@ -436,6 +411,8 @@ interface IERC721Auc {
         address,
         uint256
     ) external;
+
+    function approve(address, uint256) external;
 }
 
 contract AuctionNFT {
@@ -454,14 +431,20 @@ contract AuctionNFT {
         address winningBidder,
         uint256 highestBid
     );
-    event Bid(address indexed sender, uint256 hhighestBid);
+    event Bid(uint256 tokenId, address indexed sender, uint256 highestBid);
 
     IERC721Auc public containerNFT;
+    address Agent;
 
     constructor() {
         seller = msg.sender;
+        Agent = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
     }
 
+    modifier onlyAgent() {
+        require(msg.sender == Agent);
+        _;
+    }
     modifier onlySeller() {
         require(msg.sender == seller);
         _;
@@ -471,16 +454,16 @@ contract AuctionNFT {
         IERC721Auc _nft,
         uint256 NFTId,
         uint256 startingBid
-    ) external {
+    ) external onlyAgent {
         require(!started[NFTId], "Aready Started!");
-        require(msg.sender == seller, "Seller not Owner");
+        // require(msg.sender == seller, "Seller not Owner");
 
         containerNFT = _nft;
-        containerNFT.transferFrom(msg.sender, address(this), NFTId);
+        // containerNFT.transferFrom(containerNFT.ownerOf(NFTId), address(this), NFTId);
 
         highestBid[NFTId] = startingBid; // Staring Bid
         started[NFTId] = true;
-        // endAt[NFTId] = block.timestamp + 2 days;  // Bidding Duration
+        endAt[NFTId] = block.timestamp + 2 days; // Bidding Duration
 
         emit AuctionStarted(NFTId);
     }
@@ -489,21 +472,26 @@ contract AuctionNFT {
     function bid(uint256 NFTId, uint256 amount) external {
         require(started[NFTId], "Not started.");
         require(block.timestamp < endAt[NFTId], "Ended!");
+        require(!ended[NFTId], "Auction already ended!");
         require(amount > highestBid[NFTId]);
 
         highestBid[NFTId] = amount;
         highestBidder[NFTId] = msg.sender;
 
-        emit Bid(highestBidder[NFTId], highestBid[NFTId]);
+        emit Bid(NFTId, highestBidder[NFTId], highestBid[NFTId]);
     }
 
-    function end(uint256 NFTId) external {
+    function end(uint256 NFTId) external onlyAgent {
         require(started[NFTId], "You  need to start the auction first!");
-        // require(block.timestamp >= endAt[NFTId], "Auction is still ongoing!");
+        require(block.timestamp >= endAt[NFTId], "Auction is still ongoing!");
         require(!ended[NFTId], "Auction already ended!");
-
+        containerNFT.approve(Agent, NFTId);
         if (highestBidder[NFTId] != address(0)) {
-            containerNFT.transfer(highestBidder[NFTId], NFTId);
+            containerNFT.transferFrom(
+                address(this),
+                highestBidder[NFTId],
+                NFTId
+            );
         }
 
         ended[NFTId] = true;

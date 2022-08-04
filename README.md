@@ -6,8 +6,9 @@ In the shipping process, every container is represented using an NFT.
 This makes it easier in pwnership transfer and cargo history traceability,
 easier cargo auctioning platform, and secure shipping documentaion.
 
-Steps: 0. The contract addresses are set.
+Steps:
 
+0. The contract addresses are set.
 1. Shipper places a shipment request using requestShipment() function.
 2. Shipping agent approves the required documents and assigns a shipping container number to the request. This is done when the agent books a container pickup for the cargo approveShipmentRequest() function.
 3. Using the assigned container number, the shipper mints a container nft to his address.
@@ -30,13 +31,17 @@ Metadata Template <br>
 
 #### If the receiver decides to claim the Cargo
 
-7. Upon reaching the destination, the receiver places a claim request providing the BoL link.
-8. The documents required for cargo release are approved by a shipping agent and/or customs.
-9. Then the cargo is released to the receiver by transferring the ownership to the receiver.
+7. Upon reaching the destination, the receiver places a claim request providing the BoL link using claimCargo().
+8. The documents required for cargo release are approved by a shipping agent and/or customs using claimCargoDocumentsApproval().
+9. Then the cargo is released to the receiver by transferring the ownership to the receiver (The last transporter -> receiver using safeTransfefrFrom()).
 
 #### If the receiver decides to abandon/auction the Cargo
 
 7. The receiver sends a notice to auction the cargo.
-8. The last transporter approves the manager SC using the approveOperator() function in the ContainerNFT SC.
-9. The shipping agent sets the starting bid amount, and auction duration and auctions the cargo.
-10. After the auction ends, the cargo ownership is transferred to th ehighest bidder.
+8. The last transporter approves the manager smart contract to manage the NFT using approveOperator() function from ContainerNFT SC.
+9. The agent approves the auction while also transferring the NFT to the AuctionNFT SC using the approveAuction() function.
+10. The agent can then invoke the start() function from the AuctionNFT SC to start the auction.
+11. The shipping agent sets the starting bid amount, and auction duration and auctions the cargo.
+12. After the auction ends, the cargo ownership is transferred to the highest bidder using the end() function from the AuctionNFT SC. NB. The auction sc is operated by the agent.
+
+Final: The token can be burn using the ContainerNFT SC if the receiver or bidder deem it necessay.
