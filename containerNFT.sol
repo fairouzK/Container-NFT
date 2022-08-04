@@ -51,7 +51,7 @@ contract ShipmentManager {
     );
     event BoLIssuedAndStored(address _shipper, uint256 requestId, string _bol);
     event DocumentIssuedAndStored(
-        address shipper,
+        address _shipper,
         uint256 requestId,
         string _bol
     );
@@ -188,32 +188,32 @@ contract ShipmentManager {
 
     // After the NFT is minted, the agent issues the BoL and store it on the IPFS
     function issueBoL(
-        address _shipper,
+        address shipper,
         uint256 requestID,
         address transporter,
         string memory bol
     ) public onlyAgent {
         require(
-            shipmentRequest[_shipper][requestID].sStatus ==
+            shipmentRequest[shipper][requestID].sStatus ==
                 ShipmentState.NFTMinted,
             "Container NFT not minted!"
         );
-        uint256 tokenId = shipmentRequest[_shipper][requestID].NFTId;
+        uint256 tokenId = shipmentRequest[shipper][requestID].NFTId;
         require(
             ContainerNFT(minterContract).getApproved(tokenId) == address(this),
             "Agent not approved as operator"
         );
 
-        shipmentRequest[_shipper][requestID].bolLink = bol; // can be set through js or json
-        shipmentRequest[_shipper][requestID].sStatus = ShipmentState.BoLIssued;
-        emit BoLIssuedAndStored(_shipper, requestID, bol);
+        shipmentRequest[shipper][requestID].bolLink = bol; // can be set through js or json
+        shipmentRequest[shipper][requestID].sStatus = ShipmentState.BoLIssued;
+        emit BoLIssuedAndStored(shipper, requestID, bol);
 
         ContainerNFT(minterContract).safeTransferFrom(
             Owner(tokenId),
             transporter,
             tokenId
         );
-        shipmentRequest[_shipper][requestID].sStatus = ShipmentState.Departed;
+        shipmentRequest[shipper][requestID].sStatus = ShipmentState.Departed;
     }
 
     /*
@@ -229,6 +229,30 @@ contract ShipmentManager {
     // To check the current owner of the NFT
     function Owner(uint256 tokenId) public view returns (address) {
         return (ContainerNFT(minterContract).ownerOf(tokenId));
+    }
+
+    /*
+        For the second ownership transfer only, from the sender to the export hauler
+        To make the BoL and physical container exchange smoother, 
+        by having the shipping agent take care of the digital process flow
+    */
+    function transferContainerNFTOwnerShip(
+        address shipper,
+        uint256 shipmentID,
+        address to,
+        uint256 tokenId
+    ) public {
+        require(
+            shipmentRequest[shipper][shipmentID].sStatus ==
+                ShipmentState.BoLIssued
+        );
+
+        ContainerNFT(minterContract).safeTransferFrom(
+            Owner(tokenId),
+            to,
+            tokenId
+        );
+        // safeTransferFrom emits Transfer(from, to, tokenid) event
     }
 
     function claimCargo(
@@ -456,10 +480,8 @@ contract AuctionNFT {
         uint256 startingBid
     ) external onlyAgent {
         require(!started[NFTId], "Aready Started!");
-        // require(msg.sender == seller, "Seller not Owner");
 
         containerNFT = _nft;
-        // containerNFT.transferFrom(containerNFT.ownerOf(NFTId), address(this), NFTId);
 
         highestBid[NFTId] = startingBid; // Staring Bid
         started[NFTId] = true;
@@ -481,7 +503,7 @@ contract AuctionNFT {
         emit Bid(NFTId, highestBidder[NFTId], highestBid[NFTId]);
     }
 
-    function end(uint256 NFTId) external onlyAgent {
+    function end(uint256 NFTId) external {
         require(started[NFTId], "You  need to start the auction first!");
         require(block.timestamp >= endAt[NFTId], "Auction is still ongoing!");
         require(!ended[NFTId], "Auction already ended!");
@@ -498,7 +520,7 @@ contract AuctionNFT {
         emit AuctionEnded(NFTId, highestBidder[NFTId], highestBid[NFTId]);
     }
 
-    // Getter function
+    // Getter functions
     function getHighestBidder(uint256 NFTId) external view returns (address) {
         return highestBidder[NFTId];
     }
@@ -512,10 +534,10 @@ contract AuctionNFT {
     Metadata Template
     {
         Container Number:  
+        Ownership transfer point?
         Shipment Owner:
         Shipment Receiver:
         Shipment Content: 
-        Container Ownership Transfer Point
         Image:
         Bill Of Lading:          
     }
