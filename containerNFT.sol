@@ -116,11 +116,11 @@ contract ShipmentManager {
     }
 
     // Set the auction contract address
-    address auctionContract;
+    // address auctionContract;
 
-    function setAuctionContractAddr(address addr) public onlyContractOwner {
-        auctionContract = addr;
-    }
+    // function setAuctionContractAddr(address addr) public onlyContractOwner {
+    //     auctionContract = addr;
+    // }
 
     function getContainerState(address requester, uint256 requestId)
         public
@@ -503,7 +503,7 @@ contract AuctionNFT {
         emit Bid(NFTId, highestBidder[NFTId], highestBid[NFTId]);
     }
 
-    function end(uint256 NFTId) external {
+    function end(uint256 NFTId) external onlyAgent {
         require(started[NFTId], "You  need to start the auction first!");
         require(block.timestamp >= endAt[NFTId], "Auction is still ongoing!");
         require(!ended[NFTId], "Auction already ended!");
