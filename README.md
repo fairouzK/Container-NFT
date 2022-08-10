@@ -1,5 +1,7 @@
 # Container-NFT
 
+This repo is part of my thesis and contains 3 smart contracts: Shipment Manager, ContainerNFT and AuctionNFT.
+
 #### Thesis Part-II
 
 In the shipping process, every container is represented using an NFT.
