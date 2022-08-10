@@ -16,16 +16,20 @@ Process flow steps: <br>
 3. Using the assigned container number, the shipper mints a container nft to his address.
    The metadata of the NFT is created with the following format in json and stored in IPFS.
 
-_Metadata Template <br>
-{ <br>
-&emsp; Shipping Container Number: <br>
-&emsp; Shipment Owner: <br>
-&emsp; Shipment Receiver: <br>
-&emsp; Shipment Content: <br>
-&emsp; Shipper Company: <br>
-&emsp; Image: <br>
-&emsp; Other related Documents link (if necessary) <br>
-}_
+&emsp;&emsp;_Metadata Template <br>
+&emsp;&emsp;{ <br>
+&emsp;&emsp;&emsp; shipping container Number: <br>
+&emsp;&emsp;&emsp; shipment owner: <br>
+&emsp;&emsp;&emsp; shipment receiver: <br>
+&emsp;&emsp;&emsp; origin: <br>
+&emsp;&emsp;&emsp; destination: <br>
+&emsp;&emsp;&emsp; shipment content: <br>
+&emsp;&emsp;&emsp; shipper company: <br>
+&emsp;&emsp;&emsp; image: <br>
+&emsp;&emsp;&emsp; other related Documents link (if necessary) <br>
+&emsp;&emsp;&emsp; shipment traits: []<br>
+&emsp;&emsp;}_
+
 
 4. The shipper approves the manager contract to manage the ownership transfers of the NFT using the approveOperator from ContainerNFT SC.
 5. The shipping agent issues Bill of Lading, and stores it in IPFS using the issueBoL() function, while transferring the NFT ownership to the pickup truck's address at the same time.
