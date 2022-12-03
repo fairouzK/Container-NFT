@@ -1,7 +1,7 @@
 # Container-NFT
 
-This repo is part of my thesis and contains 3 smart contracts: Shipment Manager, ContainerNFT and AuctionNFT.
-Published paper can be accessed in IEEE website at <a href="https://ieeexplore.ieee.org/document/9964143" target="_blank"> here </a> 
+This repo is part of my thesis and contains 3 smart contracts: Shipment Manager, ContainerNFT and AuctionNFT. </br>
+Published paper can be accessed on IEEE website <a href="https://ieeexplore.ieee.org/document/9964143" target="_blank"> here </a> 
 
 #### Thesis Part-II
 
